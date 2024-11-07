@@ -1,4 +1,4 @@
-# Application Setup Guide
+# AAA-Health Frontend Application Setup Guide
 
 Follow the steps below to set up the development environment and run the application on your mobile device.
 
