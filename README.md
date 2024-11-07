@@ -16,7 +16,7 @@ You need to have **Node.js v22.11.0 (LTS)** installed to run the application.
   ```
   It should return
   ```
-  node -v
+  v22.11.0
   ```
 
 ## 2. Install Expo Go on your Phone
