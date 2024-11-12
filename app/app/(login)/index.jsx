@@ -1,27 +1,50 @@
+import axios from 'axios';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform} from 'react-native';
 
 const AuthScreen = () => {
+  const router = useRouter()
   const [isRegister, setIsRegister] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [phonenumber, setPhoneNumber] = useState('');
-  const keyboardVerticalOffset = Platform.OS === 'ios' ? 5 : 0
+  const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
 
-  const handleAuthAction = () => {
+  const handleAuthAction = async () => {
     if (isRegister) {
-      console.log('Registering:', { username, email, password });
+      const formData = new FormData();
+      formData.append('first_name', firstname);
+      formData.append('last_name', lastname);
+      formData.append('email', email);
+      formData.append('phone_number', phonenumber);
+      formData.append('password', password);
+      try {
+        const response = await axios.post('http://192.168.1.66:8000/users/register-user/', formData);
+        console.log('Registration successful:', response.data);
+      } catch (error) {
+        console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
+      }
     } else {
-      console.log('Logging in:', { username, password });
+      const formData = new FormData();
+      formData.append('email', email);
+      formData.append('password', password);
+      try {
+        const response = await axios.post('http://10.10.160.36:8000/users/login-user/', formData);
+        console.log('Login successful:', response.data);
+        router.replace('(tabs)')
+      } catch (error) {
+        console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
+      }
     }
   };
 
   return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-        <KeyboardAvoidingView behavior='position' keyboardVerticalOffset={keyboardVerticalOffset}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <Text style={styles.maintitle}>Welcome to AAA-Health</Text>
           <Text style={styles.title}>{isRegister ? 'Register' : 'Login'}</Text>
           {isRegister && (
@@ -55,14 +78,17 @@ const AuthScreen = () => {
             value={email}
             onChangeText={setEmail}
             placeholderTextColor="gray"
+            keyboardType="email-address"
+            textContentType='oneTimeCode'
           />
           <TextInput
             style={styles.input}
             placeholder="Password"
-            secureTextEntry
+            secureTextEntry={true}
             value={password}
             onChangeText={setPassword}
             placeholderTextColor="gray"
+            textContentType='oneTimeCode'
           />
 
           <TouchableOpacity style={styles.button} onPress={handleAuthAction}>
