@@ -22,7 +22,7 @@ const AuthScreen = () => {
       formData.append('phone_number', phonenumber);
       formData.append('password', password);
       try {
-        const response = await axios.post('http://192.168.1.66:8000/users/register-user/', formData);
+        const response = await axios.post('http://10.10.160.36:8000/users/register-user/', formData);
         console.log('Registration successful:', response.data);
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
