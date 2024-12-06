@@ -7,7 +7,7 @@ export default function DashBoards() {
   const { user } = useUser()
   return (
     <View style={styles.container}>
-      <Text style={styles.title}> {user.name}'s Dashboards</Text>
+      <Text style={styles.title}> {user?.name || 'User'}'s Dashboards</Text>
 
       <Link href="/Dashboards/live-reports" asChild>
         <Pressable style={styles.box}>
