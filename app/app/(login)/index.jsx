@@ -2,8 +2,11 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform} from 'react-native';
+import { useUser } from '@/context/UserContext';
+import { IP } from '@/context/route_ip'
 
 const AuthScreen = () => {
+  const { setUser } = useUser();
   const router = useRouter()
   const [isRegister, setIsRegister] = useState(false);
   const [password, setPassword] = useState('');
@@ -11,7 +14,7 @@ const AuthScreen = () => {
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [phonenumber, setPhoneNumber] = useState('');
-  const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
+  //const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
 
   const handleAuthAction = async () => {
     if (isRegister) {
@@ -22,8 +25,10 @@ const AuthScreen = () => {
       formData.append('phone_number', phonenumber);
       formData.append('password', password);
       try {
-        const response = await axios.post('http://10.10.160.36:8000/users/register-user/', formData);
+        const response = await axios.post(`http://${IP}:8000/users/register-user/`, formData);
         console.log('Registration successful:', response.data);
+        setUser({ name: response.data.first_name });
+        router.replace('(tabs)')
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
       }
@@ -32,8 +37,9 @@ const AuthScreen = () => {
       formData.append('email', email);
       formData.append('password', password);
       try {
-        const response = await axios.post('http://10.10.160.36:8000/users/login-user/', formData);
+        const response = await axios.post(`http://${IP}:8000/users/login-user/`, formData);
         console.log('Login successful:', response.data);
+        setUser({ name: response.data.first_name });
         router.replace('(tabs)')
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);

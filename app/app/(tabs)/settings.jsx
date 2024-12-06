@@ -1,10 +1,63 @@
-import axios from 'axios';
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform} from 'react-native';
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useUser } from '@/context/UserContext';
+import { useRouter } from 'expo-router';
 
 export default function SettingsScreen() {
-    return (
-        <Text>Settings</Text>
-    );
 
+  const { setUser } = useUser();
+  const router = useRouter()
+  const handleLogout = () => {
+    setUser(null);
+    router.replace('(login)')
+  };
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Settings</Text>
+
+      <TouchableOpacity style={styles.option} onPress={() => console.log('Account settings')}>
+        <Text style={styles.optionText}>Account Settings</Text>
+      </TouchableOpacity>
+
+      <View style={styles.line} />
+
+      <TouchableOpacity style={styles.option} onPress={() => console.log('Notification settings')}>
+        <Text style={styles.optionText}>Notifications</Text>
+      </TouchableOpacity>
+
+      <View style={styles.line} />
+
+      <TouchableOpacity style={styles.option} onPress={handleLogout}>
+        <Text style={styles.optionText}>Logout</Text>
+      </TouchableOpacity>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: '#f5f5f5',
+    marginTop: 30,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  option: {
+    paddingVertical: 15,
+  },
+  optionText: {
+    fontSize: 18,
+    color: '#333',
+  },
+  line: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginVertical: 10,
+  },
+});
+
