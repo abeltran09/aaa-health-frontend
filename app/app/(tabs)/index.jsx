@@ -8,7 +8,7 @@ export default function HomeScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       
-      <Text style={styles.welcomeText}>Welcome, {user?.name || 'User'}!</Text>
+      <Text style={styles.welcomeText}>Welcome, {user?.firstname || 'User'}!</Text>
       <Text style={styles.motivationText}>Your health is your wealth. Keep going!</Text>
       
       <View style={styles.quickActions}>
