@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '@/context/UserContext';
-import { useRouter } from 'expo-router';
+import { useRouter, Link } from 'expo-router';
 
 export default function SettingsScreen() {
 
@@ -12,11 +12,17 @@ export default function SettingsScreen() {
     router.replace('(login)')
   };
 
+  const handleAccountSettings = () => {
+    router.push('/settingpages/account-settings')
+  };
+
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
 
-      <TouchableOpacity style={styles.option} onPress={() => console.log('Account settings')}>
+      <TouchableOpacity style={styles.option} onPress={handleAccountSettings}>
         <Text style={styles.optionText}>Account Settings</Text>
       </TouchableOpacity>
 

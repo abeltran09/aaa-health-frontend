@@ -27,7 +27,10 @@ const AuthScreen = () => {
       try {
         const response = await axios.post(`http://${IP}:8000/users/register-user/`, formData);
         console.log('Registration successful:', response.data);
-        setUser({ name: response.data.first_name });
+        setUser({ firstname: response.data.first_name, 
+                  lastname: response.data.last_name,
+                  email: response.data.email,
+                  phonenumber: response.data.phone_number });
         router.replace('(tabs)')
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
@@ -39,7 +42,10 @@ const AuthScreen = () => {
       try {
         const response = await axios.post(`http://${IP}:8000/users/login-user/`, formData);
         console.log('Login successful:', response.data);
-        setUser({ name: response.data.first_name });
+        setUser({ firstname: response.data.first_name, 
+          lastname: response.data.last_name,
+          email: response.data.email,
+          phonenumber: response.data.phone_number });
         router.replace('(tabs)')
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
