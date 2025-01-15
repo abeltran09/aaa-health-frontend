@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, Alert} from 'react-native';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
 
@@ -15,14 +15,42 @@ const AuthScreen = () => {
   const [lastname, setLastName] = useState('');
   const [phonenumber, setPhoneNumber] = useState('');
   //const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
+  const formatPhoneNumber = (number) => {
+    const cleaned = number.replace(/\D/g, ''); // Remove non-digit characters
+    if (cleaned.length !== 10) {
+      return null; // Return null if the number doesn't have 10 digits
+    }
+    return `(${cleaned.slice(0, 3)})-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
+  };
 
   const handleAuthAction = async () => {
     if (isRegister) {
+      const formattedPhone = formatPhoneNumber(phonenumber);
+      if (!formattedPhone) {
+        Alert.alert('Invalid Phone Number', 'Please enter a valid 10-digit phone number.');
+        return;
+      }
+      else{
+        setPhoneNumber(formatPhoneNumber)
+      }
+
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert('Invalid Email', 'Please enter a valid email address.');
+        return;
+      }
+
+      if (password.length < 6) {
+        Alert.alert('Invalid Password', 'Password must be at least 6 characters long.');
+        return;
+      }
+
       const formData = new FormData();
       formData.append('first_name', firstname);
       formData.append('last_name', lastname);
-      formData.append('email', email);
-      formData.append('phone_number', phonenumber);
+      formData.append('email', email.toLowerCase());
+      formData.append('phone_number', formattedPhone);
       formData.append('password', password);
       try {
         const response = await axios.post(`http://${IP}:8000/users/register-user/`, formData);
@@ -37,7 +65,7 @@ const AuthScreen = () => {
       }
     } else {
       const formData = new FormData();
-      formData.append('email', email);
+      formData.append('email', email.toLowerCase());
       formData.append('password', password);
       try {
         const response = await axios.post(`http://${IP}:8000/users/login-user/`, formData);
@@ -48,7 +76,9 @@ const AuthScreen = () => {
           phonenumber: response.data.phone_number });
         router.replace('(tabs)')
       } catch (error) {
-        console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
+        const errorMessage = error.response?.data?.detail || 'An error occurred during login.';
+        Alert.alert('Login Failed', errorMessage);
+        console.error('Error logging in user:', errorMessage);
       }
     }
   };
