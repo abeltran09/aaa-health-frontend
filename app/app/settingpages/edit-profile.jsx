@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, TouchableWithoutFeedback } from 'react-native';
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
+import { formatPhoneNumber } from '@/context/helper-functions';
 
 export default function EditProfile() {
   const { user, setUser } = useUser(); // Access user and updateUser from context
@@ -14,6 +15,9 @@ export default function EditProfile() {
   });
 
   const handleInputChange = (field, value) => {
+    if(field == 'phonenumber'){
+      value = formatPhoneNumber(value)
+    }
     setFormData({ ...formData, [field]: value });
   };
 
@@ -45,48 +49,50 @@ export default function EditProfile() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Edit Profile</Text>
+    <TouchableWithoutFeedback>
+      <View style={styles.container}>
+        <Text style={styles.title}>Edit Profile</Text>
 
-      {/* Form Fields */}
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>First Name</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.firstname}
-          onChangeText={(text) => handleInputChange('firstname', text)}
-        />
+        {/* Form Fields */}
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>First Name</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.firstname}
+            onChangeText={(text) => handleInputChange('firstname', text)}
+          />
 
-        <Text style={styles.label}>Last Name</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.lastname}
-          onChangeText={(text) => handleInputChange('lastname', text)}
-        />
+          <Text style={styles.label}>Last Name</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.lastname}
+            onChangeText={(text) => handleInputChange('lastname', text)}
+          />
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.email}
-          onChangeText={(text) => handleInputChange('email', text)}
-          keyboardType="email-address"
-          placeholder="Enter new email (optional)"
-        />
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.email}
+            onChangeText={(text) => handleInputChange('email', text)}
+            keyboardType="email-address"
+            placeholder="Enter new email (optional)"
+          />
 
-        <Text style={styles.label}>Phone Number</Text>
-        <TextInput
-          style={styles.input}
-          value={formData.phonenumber}
-          onChangeText={(text) => handleInputChange('phonenumber', text)}
-          keyboardType="phone-pad"
-        />
+          <Text style={styles.label}>Phone Number</Text>
+          <TextInput
+            style={styles.input}
+            value={formData.phonenumber}
+            onChangeText={(text) => handleInputChange('phonenumber', text)}
+            keyboardType="phone-pad"
+          />
+        </View>
+
+        {/* Save Button */}
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Changes</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 
