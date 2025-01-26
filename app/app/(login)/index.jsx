@@ -3,7 +3,8 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, Alert} from 'react-native';
 import { useUser } from '@/context/UserContext';
-import { IP } from '@/context/route_ip'
+import { IP } from '@/context/route_ip';
+import { formatPhoneNumber } from '@/context/helper-functions'
 
 const AuthScreen = () => {
   const { setUser } = useUser();
@@ -15,23 +16,13 @@ const AuthScreen = () => {
   const [lastname, setLastName] = useState('');
   const [phonenumber, setPhoneNumber] = useState('');
   //const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
-  const formatPhoneNumber = (number) => {
-    const cleaned = number.replace(/\D/g, ''); // Remove non-digit characters
-    if (cleaned.length !== 10) {
-      return null; // Return null if the number doesn't have 10 digits
-    }
-    return `(${cleaned.slice(0, 3)})-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-  };
 
   const handleAuthAction = async () => {
     if (isRegister) {
       const formattedPhone = formatPhoneNumber(phonenumber);
-      if (!formattedPhone) {
+      if (formattedPhone.replace(/\D/g, '').length !== 10) {
         Alert.alert('Invalid Phone Number', 'Please enter a valid 10-digit phone number.');
         return;
-      }
-      else{
-        setPhoneNumber(formatPhoneNumber)
       }
 
       // Validate email
@@ -59,11 +50,22 @@ const AuthScreen = () => {
                   lastname: response.data.last_name,
                   email: response.data.email,
                   phonenumber: response.data.phone_number });
-        router.replace('(tabs)')
+        router.replace('/healthquestions/anthropometric')
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
       }
     } else {
+      // Validate email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        Alert.alert('Invalid Email', 'Please enter a valid email address.');
+        return;
+      }
+
+      if (password.length < 6) {
+        Alert.alert('Invalid Password', 'Password must be at least 6 characters long.');
+        return;
+      }
       const formData = new FormData();
       formData.append('email', email.toLowerCase());
       formData.append('password', password);
@@ -109,8 +111,9 @@ const AuthScreen = () => {
               style={styles.input}
               placeholder="Phone Number"
               value={phonenumber}
-              onChangeText={setPhoneNumber}
+              onChangeText={(number) => setPhoneNumber(formatPhoneNumber(number))}
               placeholderTextColor="gray"
+              keyboardType={'phone-pad'}
               /> 
             </>
           )}
