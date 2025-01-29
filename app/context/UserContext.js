@@ -8,6 +8,7 @@ export const UserProvider = ({ children }) => {
     lastname: '',
     email: '',
     phonenumber: '',
+    token: '',
   });
 
 

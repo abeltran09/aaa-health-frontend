@@ -4,8 +4,10 @@ import axios from 'axios';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
 import { formatPhoneNumber } from '@/context/helper-functions';
+import { useRouter } from 'expo-router'
 
 export default function EditProfile() {
+  const router = useRouter()
   const { user, setUser } = useUser(); // Access user and updateUser from context
   const [formData, setFormData] = useState({
     firstname: user.firstname,
@@ -39,6 +41,7 @@ export default function EditProfile() {
             email: response.data.email,
             phonenumber: response.data.phone_number });
         Alert.alert('Success', 'Profile updated successfully');
+        router.push('/settingpages/account-settings')
       } else {
         Alert.alert('Error', 'Failed to update profile');
       }
