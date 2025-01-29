@@ -2,20 +2,19 @@ import axios from 'axios';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, Platform, Alert} from 'react-native';
-import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip';
-import { formatPhoneNumber } from '@/context/helper-functions'
+import { formatPhoneNumber, storeToken, fetchUserData, setUserContext } from '@/context/helper-functions';
+import { useUser } from '@/context/UserContext';
 
 const AuthScreen = () => {
+  const router = useRouter();
   const { setUser } = useUser();
-  const router = useRouter()
   const [isRegister, setIsRegister] = useState(false);
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [firstname, setFirstName] = useState('');
   const [lastname, setLastName] = useState('');
   const [phonenumber, setPhoneNumber] = useState('');
-  //const keyboardVerticalOffset = Platform.OS === 'ios' ? 40 : 0
 
   const handleAuthAction = async () => {
     if (isRegister) {
@@ -43,45 +42,65 @@ const AuthScreen = () => {
       formData.append('email', email.toLowerCase());
       formData.append('phone_number', formattedPhone);
       formData.append('password', password);
+      
       try {
         const response = await axios.post(`http://${IP}:8000/users/register-user/`, formData);
-        console.log('Registration successful:', response.data);
-        setUser({ firstname: response.data.first_name, 
-                  lastname: response.data.last_name,
-                  email: response.data.email,
-                  phonenumber: response.data.phone_number });
-        router.replace('/healthquestions/anthropometric')
+        // After registration, automatically log in to get the token
+        await handleLogin(email.toLowerCase(), password);
+        router.replace('/healthquestions/anthropometric');
       } catch (error) {
         console.error('Error registering user:', error.response ? error.response.data.detail : error.message);
       }
     } else {
-      // Validate email
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        Alert.alert('Invalid Email', 'Please enter a valid email address.');
-        return;
-      }
+      await handleLogin(email.toLowerCase(), password);
+    }
+  };
 
-      if (password.length < 6) {
-        Alert.alert('Invalid Password', 'Password must be at least 6 characters long.');
-        return;
-      }
-      const formData = new FormData();
-      formData.append('email', email.toLowerCase());
-      formData.append('password', password);
-      try {
-        const response = await axios.post(`http://${IP}:8000/users/login-user/`, formData);
-        console.log('Login successful:', response.data);
-        setUser({ firstname: response.data.first_name, 
-          lastname: response.data.last_name,
-          email: response.data.email,
-          phonenumber: response.data.phone_number });
-        router.replace('(tabs)')
-      } catch (error) {
-        const errorMessage = error.response?.data?.detail || 'An error occurred during login.';
-        Alert.alert('Login Failed', errorMessage);
-        console.error('Error logging in user:', errorMessage);
-      }
+  const handleLogin = async (email, password) => {
+    // Validate email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert('Invalid Password', 'Password must be at least 6 characters long.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('username', email); // Note: Changed from 'email' to 'username'
+    formData.append('password', password);
+
+    try {
+      // Login to get token
+      const loginResponse = await axios.post(`http://${IP}:8000/users/login-user/`, formData);
+      const token = loginResponse.data.access_token;
+      
+      // Store token
+      await storeToken(token);
+
+      // Set up axios default authorization header for future requests
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      // Fetch user data using the token
+      const userData = await fetchUserData(token);
+      console.log(userData)
+
+      setUser({ 
+        firstname: userData.first_name,
+        lastname: userData.last_name,
+        email: userData.email,
+        phonenumber: userData.phone_number,
+        token: token
+      });
+      
+      router.replace('(tabs)');
+    } catch (error) {
+      const errorMessage = error.response?.data?.detail || 'An error occurred during login.';
+      Alert.alert('Login Failed', errorMessage);
+      console.error('Error logging in user:', errorMessage);
     }
   };
 

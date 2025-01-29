@@ -3,8 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'reac
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
+import { useRouter } from 'expo-router';
 
 export default function ChangePassword() {
+  const router = useRouter();
   const { user } = useUser(); // Access user and updateUser from context
   const [formData, setFormData] = useState({
     old_password: '',
@@ -16,7 +18,9 @@ export default function ChangePassword() {
     setFormData({ ...formData, [field]: value });
   };
 
+
   const handleSave = async () => {
+
     try {
       // Create FormData with current email as a separate field
       const requestData = new FormData();
@@ -27,14 +31,35 @@ export default function ChangePassword() {
 
       const response = await axios.put(`http://${IP}:8000/users/update-user-password/`, requestData);
 
-      if (response.status === 200) {
+      if (response.data.success) {
         Alert.alert('Success', 'Password updated successfully');
+        router.push('/settingpages/account-settings')
       } else {
-        Alert.alert('Error', 'Failed to update password, Make sure you entered information correctly');
+        let errorMessage = 'An error occured while updating password';
+
+        switch(response.data.error) {
+          case 'incorrect_old_password':
+            errorMessage = 'The old password you entered is incorrect';
+            break;
+          case 'passwords_dont_match':
+            errorMessage = 'New password and confirmation password do not match';
+            break;
+          case 'user_not_found':
+            errorMessage = 'User not found';
+            break;
+        }
+        Alert.alert('Error', errorMessage);
       }
     } catch (error) {
       console.error('Error updating password:', error);
-      Alert.alert('Error', error.response?.data?.message || 'An error occurred while updating password');
+
+      if (error.response?.status === 401) {
+        Alert.alert('Error', 'Unauthorized. Please log in again.');
+      } else if (error.response?.data?.detail) {
+        Alert.alert('Error', error.response.data.detail);
+      } else {
+        Alert.alert('Error', 'Unable to connect to the server. Please try again later.');
+      }
     }
   };
 
