@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import axios from 'axios';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
@@ -20,6 +20,11 @@ export default function ChangePassword() {
 
 
   const handleSave = async () => {
+    
+    if (!formData.old_password || !formData.new_password || !formData.confirm_new_password) {
+      Alert.alert('Error', 'All fields are required.');
+      return;
+    }
 
     try {
       // Create FormData with current email as a separate field
@@ -64,41 +69,43 @@ export default function ChangePassword() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Change Password</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <Text style={styles.title}>Change Password</Text>
 
-      {/* Form Fields */}
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Old Password</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry={true}
-          onChangeText={(text) => handleInputChange('old_password', text)}
-          placeholder='Enter Old Password'
-        />
+        {/* Form Fields */}
+        <View style={styles.formContainer}>
+          <Text style={styles.label}>Old Password</Text>
+          <TextInput
+            style={styles.input}
+            secureTextEntry={true}
+            onChangeText={(text) => handleInputChange('old_password', text)}
+            placeholder='Enter Old Password'
+          />
 
-        <Text style={styles.label}>New Password</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry={true}
-          onChangeText={(text) => handleInputChange('new_password', text)}
-          placeholder='Enter New Password'
-        />
+          <Text style={styles.label}>New Password</Text>
+          <TextInput
+            style={styles.input}
+            secureTextEntry={true}
+            onChangeText={(text) => handleInputChange('new_password', text)}
+            placeholder='Enter New Password'
+          />
 
-        <Text style={styles.label}>Comfirm New Password</Text>
-        <TextInput
-          style={styles.input}
-          secureTextEntry={true}
-          onChangeText={(text) => handleInputChange('confirm_new_password', text)}
-          placeholder="Enter New Password"
-        />
+          <Text style={styles.label}>Comfirm New Password</Text>
+          <TextInput
+            style={styles.input}
+            secureTextEntry={true}
+            onChangeText={(text) => handleInputChange('confirm_new_password', text)}
+            placeholder="Enter New Password"
+          />
+        </View>
+
+        {/* Save Button */}
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Text style={styles.saveButtonText}>Save Changes</Text>
+        </TouchableOpacity>
       </View>
-
-      {/* Save Button */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>Save Changes</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 }
 

@@ -30,6 +30,16 @@ import axios from 'axios';
     }
   };
 
+  export const removeToken = async () => {
+    try{
+      await AsyncStorage.removeItem('userToken');
+    }catch (error) {
+      console.log('Error removing token: ', error);
+      throw error;  
+    }
+
+  }
+
   export const fetchUserData = async (token) => {
     try{
       const response = await axios.get(`http://${IP}:8000/users/get-user/`, {

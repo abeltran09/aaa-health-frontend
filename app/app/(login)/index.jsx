@@ -6,6 +6,7 @@ import { IP } from '@/context/route_ip';
 import { formatPhoneNumber, storeToken, fetchUserData, setUserContext } from '@/context/helper-functions';
 import { useUser } from '@/context/UserContext';
 
+
 const AuthScreen = () => {
   const router = useRouter();
   const { setUser } = useUser();
@@ -144,6 +145,8 @@ const AuthScreen = () => {
             placeholderTextColor="gray"
             keyboardType="email-address"
             textContentType='oneTimeCode'
+            accessible={true} 
+            importantForAccessibility="yes"
           />
           <TextInput
             style={styles.input}
