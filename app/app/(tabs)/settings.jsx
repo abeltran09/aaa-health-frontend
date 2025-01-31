@@ -1,14 +1,16 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useUser } from '@/context/UserContext';
+import { removeToken } from '@/context/helper-functions'
 import { useRouter, Link } from 'expo-router';
 
 export default function SettingsScreen() {
 
   const { setUser } = useUser();
   const router = useRouter()
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setUser(null);
+    await removeToken();
     router.replace('(login)')
   };
 

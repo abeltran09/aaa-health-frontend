@@ -33,15 +33,19 @@ export default function AccountSettings() {
             <TouchableOpacity style={styles.option} onPress={handleEditProfile}>
                 <Text style={styles.optionText}>Edit Profile</Text>
             </TouchableOpacity>
-            
 
             <View style={styles.line} />
             
-
             {/* Notifications Option */}
             <TouchableOpacity style={styles.option} onPress={handleChangePassword}>
                 <Text style={styles.optionText}>Change Password</Text>
             </TouchableOpacity>
+            <View style={styles.line} />
+
+            <TouchableOpacity style={styles.option} onPress={() => console.log('Delete User')}>
+                <Text style={styles.optionText}>Delete Account</Text>
+            </TouchableOpacity>
+            
             <View style={styles.line} />
 
         </View>
