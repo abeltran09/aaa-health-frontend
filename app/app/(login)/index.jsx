@@ -90,6 +90,7 @@ const AuthScreen = () => {
       console.log(userData)
 
       setUser({ 
+        user_id: userData.user_id,
         firstname: userData.first_name,
         lastname: userData.last_name,
         email: userData.email,

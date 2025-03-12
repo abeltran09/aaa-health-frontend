@@ -1,19 +1,67 @@
 import React from 'react';
-import { ScrollView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import axios from 'axios';
+import { useState } from 'react';
+import { ScrollView, Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useUser } from '@/context/UserContext';
+import { IP } from '@/context/route_ip'
 
 export default function HomeScreen() {
   const { user } = useUser();
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+
+  const sendUserId = async () => {
+    if (!user.user_id) {  // Note: Fixed the logic here - should check if it's missing
+      Alert.alert('Error', 'User ID is missing');
+      return;
+    }
+    
+    setIsConnecting(true);
+    
+    try {
+      const response = await axios.post(`http://${IP}:8000/aaa-health/api/v1/ws/set-user-id/`, {
+        user_id: user.user_id
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      Alert.alert('Success', 'Device connected successfully');
+      setIsConnected(true)
+      
+    } catch (error) {
+      console.error('Error connecting device:', error);
+      
+      if (error.response) {
+        Alert.alert('Error', error.response.data.detail || 'Failed to connect device');
+      } else if (error.request) {
+        Alert.alert('Error', 'No response from server. Check your connection.');
+      } else {
+        Alert.alert('Error', 'Connection failed. Please try again.');
+      }
+    } finally {
+      setIsConnecting(false);
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       
       <Text style={styles.welcomeText}>Welcome, {user?.firstname || 'User'}!</Text>
       <Text style={styles.motivationText}>Your health is your wealth. Keep going!</Text>
+
+      {/* Device Connection Status Section */}
+      <View style={styles.deviceStatusContainer}>
+        <Text style={styles.deviceStatusText}>Device Status: </Text>
+        <Text style={[styles.deviceStatus, isConnected ? styles.connected : styles.disconnected]}>
+          {isConnected ? 'Connected' : 'Disconnected'}
+        </Text>
+      </View>
       
       <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Sync Device</Text>
+        <TouchableOpacity style={styles.button} onPress={sendUserId} disabled={isConnecting}>
+          <Text style={styles.buttonText}>{isConnecting ? "Connecting..." : "Sync Device"}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>My Measurements</Text>
@@ -139,5 +187,26 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
     fontWeight: 'bold',
-  }
+  },
+  deviceStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  deviceStatusText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginRight: 10,
+  },
+  deviceStatus: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  connected: {
+    color: '#4CAF50',
+  },
+  disconnected: {
+    color: '#F44336',
+  },
+
 });
