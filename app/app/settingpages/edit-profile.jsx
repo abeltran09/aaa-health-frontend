@@ -36,7 +36,9 @@ export default function EditProfile() {
       const response = await axios.put(`http://${IP}:8000/users/edit-profile/`, requestData);
 
       if (response.status === 200) {
-        setUser({ firstname: response.data.first_name, 
+        setUser({ 
+            user_id: user.user_id,
+            firstname: response.data.first_name, 
             lastname: response.data.last_name,
             email: response.data.email,
             phonenumber: response.data.phone_number });

@@ -11,7 +11,8 @@ export default function HomeScreen() {
   const [isConnected, setIsConnected] = useState(false);
 
   const sendUserId = async () => {
-    if (!user.user_id) {  // Note: Fixed the logic here - should check if it's missing
+    console.log(user.user_id)
+    if (!user.user_id) {
       Alert.alert('Error', 'User ID is missing');
       return;
     }
@@ -43,6 +44,42 @@ export default function HomeScreen() {
     } finally {
       setIsConnecting(false);
     }
+
+  };
+
+  const disconnectDevice = async () => {
+    if (!user.user_id) {
+      Alert.alert('Error', 'User ID is missing');
+      return;
+    }
+    
+    setIsConnecting(true);
+    
+    try {
+      const response = await axios.post(`http://${IP}:8000/aaa-health/api/v1/ws/disconnect-device/`, {
+        user_id: user.user_id
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      Alert.alert('Success', 'Device disconnected successfully');
+      setIsConnected(false);
+      
+    } catch (error) {
+      console.error('Error disconnecting device:', error);
+      
+      if (error.response) {
+        Alert.alert('Error', error.response.data.detail || 'Failed to disconnect device');
+      } else if (error.request) {
+        Alert.alert('Error', 'No response from server. Check your connection.');
+      } else {
+        Alert.alert('Error', 'Disconnection failed. Please try again.');
+      }
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   return (
@@ -60,8 +97,8 @@ export default function HomeScreen() {
       </View>
       
       <View style={styles.quickActions}>
-        <TouchableOpacity style={styles.button} onPress={sendUserId} disabled={isConnecting}>
-          <Text style={styles.buttonText}>{isConnecting ? "Connecting..." : "Sync Device"}</Text>
+        <TouchableOpacity style={styles.button} onPress={isConnected ? disconnectDevice : sendUserId} disabled={isConnecting}>
+          <Text style={styles.buttonText}>{isConnected ? "Disconnect Device" : "Sync Device"}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>My Measurements</Text>
