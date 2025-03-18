@@ -1,6 +1,6 @@
 import React from 'react';
 import axios from 'axios';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ScrollView, Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useUser } from '@/context/UserContext';
 import { IP } from '@/context/route_ip'
@@ -9,6 +9,70 @@ export default function HomeScreen() {
   const { user } = useUser();
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [metrics, setMetrics] = useState({
+    steps: 0,
+    avg_heart_rate: 0,
+    min_heart_rate: 0,
+    max_heart_rate: 0
+  });
+
+  const wsRef = useRef(null);
+
+  useEffect(() =>{
+    if(user?.user_id && isConnected){
+      const wsUrl = `ws://${IP}:8000/aaa-health/api/v1/ws/frontend-updates?user_id=${user.user_id}`;
+      wsRef.current = new WebSocket(wsUrl);
+
+      wsRef.current.onopen = () => {
+        console.log('WebSocket connection established');
+        wsRef.current.send(JSON.stringify({ user_id: user.user_id }));
+      };
+
+      wsRef.current.onmessage = (event) => {
+        console.log('WebSocket message received:', event.data);
+        try {
+          const data = JSON.parse(event.data);
+          console.log('Parsed data:', data); // More detailed logging
+          if (data.type === 'metrics_update' && data.data) {
+            console.log('Setting metrics:', data.data);
+            setMetrics(prevMetrics => ({
+              ...prevMetrics,
+              ...data.data
+            }));
+          }
+        } catch (error) {
+          console.error('WebSocket parsing error:', error);
+        }
+      };
+
+      wsRef.current.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+      
+      wsRef.current.onclose = () => {
+        console.log('WebSocket connection closed');
+      };
+      
+      // Clean up WebSocket connection on unmount
+      return () => {
+        if (wsRef.current) {
+          wsRef.current.close();
+        }
+      };
+    }
+
+    }, [user?.user_id, isConnected]);
+
+    const formatMetricValue = (type, value) => {
+      if (type.includes('heart_rate')) {
+        return `${Math.round(value)} bpm`;
+      } else if (type === 'steps') {
+        return value.toLocaleString();
+      } else if (type === 'calories') {
+        return `${Math.round(value)} kcal`;
+      }
+      return value.toString();
+    };
 
   const sendUserId = async () => {
     console.log(user.user_id)
@@ -108,16 +172,16 @@ export default function HomeScreen() {
       
       <View style={styles.metrics}>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Steps</Text>
-          <Text style={styles.metricValue}>10,250</Text>
+          <Text style={styles.metricLabel}>Max Heart Rate</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('max_heart_rate', metrics.max_heart_rate || 0)}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Heart Rate</Text>
-          <Text style={styles.metricValue}>72 bpm</Text>
+          <Text style={styles.metricLabel}>Avg Heart Rate</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('avg_heart_rate', metrics.avg_heart_rate || 0)}</Text>
         </View>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Calories Burned</Text>
-          <Text style={styles.metricValue}>450 kcal</Text>
+          <Text style={styles.metricLabel}>Min Heart Rate</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('min_heart_rate', metrics.min_heart_rate || 0)}</Text>
         </View>
       </View>
       <Text style={styles.tipsHeader}>Guides</Text>
