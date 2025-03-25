@@ -103,7 +103,7 @@ export default function Anthropometric() {
                 />
 
                 {/* Weight Input */}
-                <Text style={styles.label}>Weight (kg)</Text>
+                <Text style={styles.label}>Weight (lbs)</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Enter your weight"

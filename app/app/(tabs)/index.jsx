@@ -13,7 +13,10 @@ export default function HomeScreen() {
     steps: 0,
     avg_heart_rate: 0,
     min_heart_rate: 0,
-    max_heart_rate: 0
+    max_heart_rate: 0,
+    current_heart_rate: 0,
+    respiratory_rate: 0,
+    inter_beat_interval: 0
   });
 
   const wsRef = useRef(null);
@@ -70,6 +73,10 @@ export default function HomeScreen() {
         return value.toLocaleString();
       } else if (type === 'calories') {
         return `${Math.round(value)} kcal`;
+      } else if (type === 'respiratory_rate') {
+        return `${Math.round(value)} bpm`;
+      } else if (type === 'inter_beat_interval') {
+        return `${Math.round(value)} ms`;
       }
       return value.toString();
     };
@@ -169,21 +176,37 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      
+      <Text style={styles.tipsHeader}>Health Metrics</Text>
       <View style={styles.metrics}>
         <View style={styles.metricCard}>
-          <Text style={styles.metricLabel}>Max Heart Rate</Text>
-          <Text style={styles.metricValue}>{formatMetricValue('max_heart_rate', metrics.max_heart_rate || 0)}</Text>
+          <Text style={styles.metricLabel}>Current Heart Rate</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('current_heart_rate', metrics.current_heart_rate || 0)}</Text>
         </View>
         <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>Avg Heart Rate</Text>
           <Text style={styles.metricValue}>{formatMetricValue('avg_heart_rate', metrics.avg_heart_rate || 0)}</Text>
         </View>
         <View style={styles.metricCard}>
+          <Text style={styles.metricLabel}>Avg RR</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('respiratory_rate', metrics.respiratory_rate || 0)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.metrics}>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricLabel}>Max Heart Rate </Text>
+          <Text style={styles.metricValue}>{formatMetricValue('max_heart_rate', metrics.max_heart_rate || 0)}</Text>
+        </View>
+        <View style={styles.metricCard}>
           <Text style={styles.metricLabel}>Min Heart Rate</Text>
           <Text style={styles.metricValue}>{formatMetricValue('min_heart_rate', metrics.min_heart_rate || 0)}</Text>
         </View>
+        <View style={styles.metricCard}>
+          <Text style={styles.metricLabel}>Inter-Beat Interval</Text>
+          <Text style={styles.metricValue}>{formatMetricValue('inter_beat_interval', metrics.inter_beat_interval || 0)}</Text>
+        </View>
       </View>
+      
       <Text style={styles.tipsHeader}>Guides</Text>
       <View style={styles.guides}>
         <TouchableOpacity style={styles.guideCard}>
