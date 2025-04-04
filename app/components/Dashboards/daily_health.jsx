@@ -32,6 +32,10 @@ const Daily_Health = () => {
     daily_average: {
       heart_rate: 0,
       hrv: 0
+    },
+    real_time: {
+      real_heart_rate: [],
+      real_hrv: []
     }
   });
   
@@ -82,6 +86,10 @@ const Daily_Health = () => {
                 heart_rate: message.data.avg_heart_rate || 0,
                 hrv: message.data.avg_heart_rate_variability || 0,
               },
+              real_time: {
+                real_heart_rate: [...(prevState.real_time?.real_heart_rate || []), message.data.current_heart_rate],
+                real_hrv: [...(prevState.real_time?.real_hrv || []), message.data.heart_rate_variability]
+              }
             }));
           }
         } catch (error) {
@@ -164,6 +172,20 @@ const Daily_Health = () => {
     );
   }
 
+  const getHeartRateData = () => {
+    if (healthData?.real_time?.real_heart_rate?.length > 0) {
+      return healthData.real_time.real_heart_rate;
+    }
+    return [0, 0];
+  };
+
+  const getHRVData = () => {
+    if (healthData?.real_time?.real_hrv?.length > 0) {
+      return healthData.real_time.real_hrv;
+    }
+    return [0, 0];
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -237,9 +259,7 @@ const Daily_Health = () => {
               labels: healthData.hourly_averages.hours,
               datasets: [
                 {
-                  data: healthData.hourly_averages.heart_rate.length > 0 ? 
-                         healthData.hourly_averages.heart_rate : 
-                         [0, 0],
+                  data: getHeartRateData(),
                 },
               ],
             }}
@@ -261,9 +281,7 @@ const Daily_Health = () => {
               labels: healthData.hourly_averages.hours,
               datasets: [
                 {
-                  data: healthData.hourly_averages.hrv.length > 0 ? 
-                         healthData.hourly_averages.hrv : 
-                         [0, 0],
+                  data: getHRVData(),
                 },
               ],
             }}
