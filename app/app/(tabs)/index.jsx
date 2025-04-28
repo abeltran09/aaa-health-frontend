@@ -32,12 +32,10 @@ export default function HomeScreen() {
       };
 
       wsRef.current.onmessage = (event) => {
-        console.log('WebSocket message received:', event.data);
         try {
           const data = JSON.parse(event.data);
-          console.log('Parsed data:', data); // More detailed logging
+          // console.log('Parsed data:', data); // More detailed logging
           if (data.type === 'metrics_update' && data.data) {
-            console.log('Setting metrics:', data.data);
             setMetrics(prevMetrics => ({
               ...prevMetrics,
               ...data.data

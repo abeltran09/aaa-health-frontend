@@ -10,6 +10,13 @@ export default function DashboardLayout() {
           headerBackTitle: 'Go Back', // Change back button title
         }}
       />
+      <Stack.Screen
+        name="daily-reports"
+        options={{
+          title: 'Daily Reports', // Set header title for this screen
+          headerBackTitle: 'Go Back', // Change back button title
+        }}
+      />
     </Stack>
   );
 }
